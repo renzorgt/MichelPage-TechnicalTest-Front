@@ -12,7 +12,7 @@ Antes de ejecutar el proyecto asegúrate de tener instalado:
 |---|---|
 | Node.js | 18 o superior |
 | npm | 9 o superior |
-| Angular CLI | 17 (`npm install -g @angular/cli`) |
+| Angular CLI | 21 (`npm install -g @angular/cli`) |
 
 ---
 
@@ -34,6 +34,7 @@ apiBase: 'https://localhost:7014/api/'
 > [!IMPORTANT]
 > Si el backend corre en un puerto o host diferente, debes actualizar la propiedad `apiBase` en ambos archivos de entorno **antes de levantar el frontend**.
 
+> Si el Front tiene un puerto diferente al 4200, se debe tener en cuenta la configuracion de los cors en el backend.
 ---
 
 ## Instalación y Ejecución
