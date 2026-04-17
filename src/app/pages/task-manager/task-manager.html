@@ -3,19 +3,30 @@
         <mat-toolbar class="custom-header">
             <mat-card-title>Task Manager</mat-card-title>
             <div class="example-spacer"></div>
-            <mat-icon style="color: white;" routerLink="/dashboard/cotizaciones" matTooltip="Nueva Cotización"
-                class="pointer">add_circle</mat-icon>
+            <!-- TODO: Route to task creation -->
         </mat-toolbar>
     </mat-card>
+    <mat-card style="margin-top: 10px; padding: 10px">
+        <span style="color: rgb(41, 40, 40);" matTooltip="Nueva Tarea" class="pointer">Crear Tarea</span> <mat-icon
+            style="color: rgb(41, 40, 40);" matTooltip="Nueva Tarea" class="pointer">add_circle</mat-icon>
+    </mat-card>
+    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
-    @if (loading){
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    }
+    <div class="mat-elevation-z8 filter-container"
+        style="padding: 10px 15px 0 15px; margin-top: 15px; background: white; border-radius: 4px; display: flex; gap: 16px;">
+        <mat-form-field style="width: 200px;">
+            <mat-label>Estado</mat-label>
+            <mat-select [value]="statusFilter" (selectionChange)="onFilterChange('status', $event.value)">
+                <mat-option value="Todos">Todos</mat-option>
+                <mat-option value="Pending">Pendiente</mat-option>
+                <mat-option value="InProgress">En progreso</mat-option>
+                <mat-option value="Done">Completada</mat-option>
+            </mat-select>
+        </mat-form-field>
 
-    <div class="mat-elevation-z8">
-        <mat-form-field class="filter">
-            <mat-label>Filtro de Búsqueda</mat-label>
-            <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por cliente, estado..." #input>
+        <mat-form-field style="flex: 1;">
+            <mat-label>Filtro general</mat-label>
+            <input matInput (keyup)="onFilterChange('text', $event)" placeholder="Buscar por título, usuario..." #input>
         </mat-form-field>
     </div>
 
@@ -29,75 +40,51 @@
                     <td mat-cell *matCellDef="let element">{{element.id}}</td>
                 </ng-container>
 
-                <!-- Cliente Column -->
-                <ng-container matColumnDef="clienteId">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Identificación</th>
-                    <td mat-cell *matCellDef="let element">{{element.cliente.numeroDocumento}}</td>
+                <!-- Título Column -->
+                <ng-container matColumnDef="titulo">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Título</th>
+                    <td mat-cell *matCellDef="let element">{{element.titulo}}</td>
                 </ng-container>
 
-                <ng-container matColumnDef="nombreCompleto">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
-                    <td mat-cell *matCellDef="let element">{{element.cliente.nombreCompleto}}</td>
-                </ng-container>
-
-                <!-- Teléfono Column -->
-                <ng-container matColumnDef="telefono">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono</th>
-                    <td mat-cell *matCellDef="let element">{{element.cliente?.telefono}}</td>
-                </ng-container>
-
-                <!-- Fecha Evento Column -->
-                <ng-container matColumnDef="fechaEvento">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Evento</th>
-                    <!-- <td mat-cell *matCellDef="let element">{{element.fechaEvento | date:'yyyy/MM/dd'}}</td> -->
-                </ng-container>
-
-                <!-- Num Personas Column -->
-                <ng-container matColumnDef="numPersonas">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Personas</th>
-                    <td mat-cell *matCellDef="let element">{{element.numPersonas}}</td>
-                </ng-container>
-
-                <!-- Total Column -->
-                <ng-container matColumnDef="total">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+                <!-- Usuario Column -->
+                <ng-container matColumnDef="userName">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Usuario Asignado</th>
+                    <td mat-cell *matCellDef="let element">{{element.userName}}</td>
                 </ng-container>
 
                 <!-- Estado Column -->
-                <!-- <ng-container matColumnDef="estado">
+                <ng-container matColumnDef="status">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
                     <td mat-cell *matCellDef="let element">
                         <span [ngClass]="{
-                            'estado-pendiente': element.estado === 'Pendiente',
-                            'estado-confirmada': element.estado === 'Confirmada',
-                            'estado-rechazada': element.estado === 'Rechazada'
-                        }">{{element.estado}}</span>
+                            'estado-pendiente': element.status === 'Pendiente',
+                            'estado-completada': element.status === 'Completada'
+                        }">{{element.status}}</span>
                     </td>
-                </ng-container> -->
+                </ng-container>
 
-                <!-- Fecha Inserta Column -->
-                <ng-container matColumnDef="fechaInserta">
+                <!-- Fecha Creacion Column -->
+                <ng-container matColumnDef="fechaCreacion">
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Creación</th>
-                    <!-- <td mat-cell *matCellDef="let element">{{element.fechaInserta | date:'yyyy/MM/dd'}}</td> -->
+                    <td mat-cell *matCellDef="let element">{{element.fechaCreacion | date:'yyyy/MM/dd HH:mm'}}</td>
+                </ng-container>
+
+                <!-- Fecha Modificacion Column -->
+                <ng-container matColumnDef="fechaModificacion">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Modificación</th>
+                    <td mat-cell *matCellDef="let element">{{element.fechaModificacion | date:'yyyy/MM/dd HH:mm'}}</td>
                 </ng-container>
 
                 <!-- Acciones Column -->
                 <ng-container matColumnDef="acciones">
                     <th mat-header-cell *matHeaderCellDef>Acciones</th>
                     <td mat-cell *matCellDef="let element" style="text-align: right;">
-                        <!-- @if (element.estado === 'Pendiente') {
-                        <a matTooltip="Confirmar cotización" class="pointer" style="color: #0f5132;"
-                            (click)="confirmar(element)">
-                            <mat-icon>check_circle</mat-icon>
-                        </a>
-                        }
                         <a matTooltip="Editar" style="color: rgb(113, 113, 113);" class="pointer"
-                            (click)="editar(element.id)"><mat-icon>edit</mat-icon></a>
-                        <a matTooltip="Imprimir cotización" class="pointer" style="color: rgb(113, 113, 113);"
-                            (click)="imprimir(element)">
-                            <mat-icon>print</mat-icon></a>
+                            (click)="editar(element.id)">
+                            <mat-icon>edit</mat-icon>
+                        </a>
                         <a matTooltip="Eliminar" class="pointer"
-                            style="color: rgb(113, 113, 113);"><mat-icon>delete</mat-icon></a> -->
+                            style="color: rgb(113, 113, 113);"><mat-icon>delete</mat-icon></a>
                     </td>
                 </ng-container>
 
@@ -106,11 +93,11 @@
 
                 <!-- Row shown when there is no matching data -->
                 <tr class="mat-row" *matNoDataRow>
-                    <td class="mat-cell" colspan="8">No se encontraron cotizaciones para "{{input.value}}"</td>
+                    <td class="mat-cell" colspan="7">No se encontraron tareas para "{{input.value}}"</td>
                 </tr>
             </table>
         </div>
         <mat-paginator style="background-color: rgb(223, 223, 223);" [pageSizeOptions]="[5, 10, 25, 100]"
-            aria-label="Seleccionar página de cotizaciones"></mat-paginator>
+            aria-label="Seleccionar página"></mat-paginator>
     </div>
 </div>
