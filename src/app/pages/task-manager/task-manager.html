@@ -1,9 +1,16 @@
 <div class="container-fluid">
     <mat-card style="margin-top: 10px; padding: 10px">
         <mat-toolbar class="custom-header">
+            <span style="color: rgb(0, 0, 0); font-size: 0.9rem; margin-right: 12px;">
+                Bienvenido, {{ currentUser?.nombre }}
+            </span>
+            <button mat-icon-button matTooltip="Cerrar sesión" (click)="logout()" style="color: rgb(70, 70, 70);">
+                <mat-icon>logout</mat-icon>
+            </button>
+        </mat-toolbar>
+        <mat-toolbar class="custom-header">
             <mat-card-title>Task Manager</mat-card-title>
             <div class="example-spacer"></div>
-            <!-- TODO: Route to task creation -->
         </mat-toolbar>
     </mat-card>
     <mat-card style="margin-top: 10px; padding: 10px">
@@ -12,6 +19,11 @@
                 (click)="openCreateModal()">Crear Tarea</span>
             <mat-icon style="color: rgb(41, 40, 40);" matTooltip="Nueva Tarea" class="pointer"
                 (click)="openCreateModal()">add_circle</mat-icon>
+
+            <span style="color: rgb(41, 40, 40); margin-left: 16px;" matTooltip="Nuevo Usuario" class="pointer"
+                (click)="openCreateUserModal()">Nuevo Usuario</span>
+            <mat-icon style="color: rgb(41, 40, 40);" matTooltip="Nuevo Usuario" class="pointer"
+                (click)="openCreateUserModal()">person_add</mat-icon>
         </div>
     </mat-card>
     @if (loading) {
@@ -24,9 +36,9 @@
             <mat-label>Estado</mat-label>
             <mat-select [value]="statusFilter" (selectionChange)="onFilterChange('status', $event.value)">
                 <mat-option value="Todos">Todos</mat-option>
-                <mat-option value="Pendiente">Pendiente</mat-option>
-                <mat-option value="En Curso">En Curso</mat-option>
-                <mat-option value="Realizada">Realizada</mat-option>
+                <mat-option value="Pending">Pending</mat-option>
+                <mat-option value="InProgress">InProgress</mat-option>
+                <mat-option value="Done">Done</mat-option>
             </mat-select>
         </mat-form-field>
 
@@ -63,9 +75,9 @@
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
                     <td mat-cell *matCellDef="let element">
                         <span [ngClass]="{
-                            'estado-pendiente': element.status === 'Pendiente',
-                            'estado-completada': element.status === 'Realizada',
-                            'estado-en-curso': element.status === 'En Curso'
+                            'estado-pendiente': element.status === 'Pending',
+                            'estado-en-curso': element.status === 'InProgress',
+                            'estado-completada': element.status === 'Done'
                         }">{{element.status}}</span>
                     </td>
                 </ng-container>
@@ -107,26 +119,33 @@
                     <th mat-header-cell *matHeaderCellDef mat-sort-header>F. Creación</th>
                     <td mat-cell *matCellDef="let element">{{element.fechaCreacion | date:'yyyy/MM/dd'}}</td>
                 </ng-container>
-
+                <ng-container matColumnDef="fechaModificacion">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>F. Modificación</th>
+                    <td mat-cell *matCellDef="let element">
+                        @if (element.fechaModificacion && !element.fechaModificacion.startsWith('0001')) {
+                            {{ element.fechaModificacion | date:'yyyy/MM/dd' }}
+                        }
+                    </td>
+                </ng-container>
                 <!-- Acciones Column -->
                 <ng-container matColumnDef="acciones">
                     <th mat-header-cell *matHeaderCellDef>Acciones</th>
                     <td mat-cell *matCellDef="let element" style="text-align: right;">
-                        @if(element.status === 'En Curso') {
+                        @if(element.status === 'InProgress') {
                         <a matTooltip="Finalizar Tarea" style="color: rgb(0, 161, 13);" class="pointer"
-                            (click)="editar(element.id)">
+                            (click)="cambiarEstado(element.id, 'Done')">
                             <mat-icon>done_outline</mat-icon>
                         </a>
                         }
-                        @if(element.status === 'Pendiente') {
+                        @if(element.status === 'Pending') {
                         <a matTooltip="Iniciar Tarea" style="color: rgb(0, 2, 143);" class="pointer"
-                            (click)="editar(element.id)">
+                            (click)="cambiarEstado(element.id, 'InProgress')">
                             <mat-icon>play_circle</mat-icon>
                         </a>
                         }
-                        @if(element.status !== 'Realizada') {
-                        <a matTooltip="Eliminar Tarea" class="pointer"
-                            style="color: rgb(173, 34, 34);"><mat-icon>delete</mat-icon></a>
+                        @if(element.status !== 'Done') {
+                        <a matTooltip="Eliminar Tarea" class="pointer" style="color: rgb(173, 34, 34);"
+                            (click)="eliminar(element.id)"><mat-icon>delete</mat-icon></a>
                         }
                     </td>
                 </ng-container>

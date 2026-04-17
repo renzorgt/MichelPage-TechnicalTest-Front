@@ -103,6 +103,7 @@ export class CreateTaskModalComponent implements OnInit {
     const payload = {
       titulo: formVals.titulo,
       userId: formVals.userId,
+      userIdCrea: this.data?.currentUserId || 0,
       informacion: JSON.stringify(customInfo)
     };
 

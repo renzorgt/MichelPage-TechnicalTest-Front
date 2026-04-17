@@ -1,0 +1,21 @@
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px 0 24px;
+
+    h2 {
+        margin: 0;
+        font-weight: 500;
+        color: #1a237e;
+    }
+}
+
+.modal-body {
+    padding: 16px 24px;
+    max-height: 500px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}

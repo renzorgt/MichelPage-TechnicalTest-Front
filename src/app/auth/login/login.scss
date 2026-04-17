@@ -94,6 +94,21 @@
   }
 }
 
+.btn-new-user {
+  width: 100%;
+  color: #1a237e;
+  border-color: #1a237e !important;
+  margin-top: 4px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+}
+
 /* ---------- Auth Error ---------- */
 .login-error {
   display: flex;

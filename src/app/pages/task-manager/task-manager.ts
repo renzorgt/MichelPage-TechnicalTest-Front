@@ -1,5 +1,5 @@
-import { Component, ViewChild, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, ViewChild, OnInit, ChangeDetectorRef, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 import { MatCardModule } from "@angular/material/card";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -12,12 +12,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import Swal from 'sweetalert2';
 
 import { TaskService } from '../../core/services/task.service';
 import { TaskResultDto } from '../../core/interfaces/task.interface';
 import { CreateTaskModalComponent } from './create-task-modal/create-task-modal';
+import { CreateUserModalComponent } from '../../auth/create-user-modal/create-user-modal';
 
 @Component({
   selector: 'app-task-manager',
@@ -43,22 +44,30 @@ import { CreateTaskModalComponent } from './create-task-modal/create-task-modal'
 })
 export class TaskManager implements OnInit {
   loading = true;
-  dataSource = new MatTableDataSource<TaskResultDto>();
-  displayedColumns: string[] = ['id', 'titulo', 'userName', 'status', 'prioridad', 'fechaEstimada', 'descripcion', 'fechaCreacion', 'acciones'];
+  dataSource = new MatTableDataSource<any>();
+  displayedColumns: string[] = ['id', 'titulo', 'userName', 'status', 'prioridad', 'fechaEstimada', 'descripcion', 'fechaCreacion', 'fechaModificacion', 'acciones'];
 
   statusFilter = 'Todos';
   textFilter = '';
+  currentUser: any = null;
+
+  private readonly platformId = inject(PLATFORM_ID);
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
-    private taskService: TaskService, 
+    private taskService: TaskService,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const raw = sessionStorage.getItem('currentUser');
+      if (raw) this.currentUser = JSON.parse(raw);
+    }
     this.setupCustomFilter();
     this.loadTasks();
   }
@@ -93,16 +102,16 @@ export class TaskManager implements OnInit {
         const mappedTasks = (tasks || []).map(t => {
           let extra: any = {};
           try {
-             if (t.informacion) {
-               extra = JSON.parse(t.informacion);
-             }
-          } catch(e) {}
-          
+            if (t.informacion) {
+              extra = JSON.parse(t.informacion);
+            }
+          } catch (e) { }
+
           return {
-             ...t,
-             prioridad: extra.prioridad || 'N/A',
-             fechaEstimada: extra.fechaEstimada || null,
-             descripcion: extra.descripcion || 'Sin descripción'
+            ...t,
+            prioridad: extra.prioridad || 'N/A',
+            fechaEstimada: extra.fechaEstimada || null,
+            descripcion: extra.descripcion || 'Sin descripción'
           };
         });
 
@@ -151,12 +160,32 @@ export class TaskManager implements OnInit {
     }
   }
 
+  openCreateUserModal(): void {
+    this.dialog.open(CreateUserModalComponent, {
+      width: '480px',
+      disableClose: true,
+      autoFocus: false
+    }).afterClosed().subscribe((created: boolean) => {
+      if (created) {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Usuario registrado!',
+          text: 'El usuario fue creado correctamente.',
+          confirmButtonColor: '#1a237e',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    });
+  }
+
   openCreateModal(): void {
     const dialogRef = this.dialog.open(CreateTaskModalComponent, {
       width: '600px',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container'
+      panelClass: 'custom-dialog-container',
+      data: { currentUserId: this.currentUser?.id }
     });
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
@@ -170,14 +199,87 @@ export class TaskManager implements OnInit {
           timer: 2000,
           showConfirmButton: false
         });
-        
+
         this.loadTasks();
       }
     });
   }
 
-  editar(id: number): void {
-    // Implementar editar
+  cambiarEstado(id: number, newStatus: string): void {
+    Swal.fire({
+      title: '¿Confirmar Cambio de Estado?',
+      text: `La tarea pasará a estado "${newStatus}".`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#1a237e',
+      cancelButtonColor: '#757575',
+      confirmButtonText: 'Continuar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.loading = true;
+        this.taskService.updateTaskStatus({ id, status: newStatus, userIdMod: this.currentUser?.id || 0 }).subscribe({
+          next: () => {
+            Swal.fire({
+              title: '¡Actualizada!',
+              text: 'El estado se ha actualizado correctamente.',
+              icon: 'success',
+              confirmButtonColor: '#1a237e',
+              timer: 1500,
+              showConfirmButton: false
+            });
+            this.loadTasks();
+          },
+          error: () => {
+            this.loading = false;
+            this.cdr.detectChanges();
+            Swal.fire('Error', 'No se pudo actualizar la tarea.', 'error');
+          }
+        });
+      }
+    });
+  }
+
+  eliminar(id: number): void {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "¡Esta acción eliminará la tarea de manera permanente!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#757575',
+      confirmButtonText: 'Continuar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.loading = true;
+        this.taskService.deleteTask(id, this.currentUser?.id || 0).subscribe({
+          next: () => {
+            Swal.fire({
+              title: '¡Eliminada!',
+              text: 'La tarea ha sido borrada del sistema.',
+              icon: 'success',
+              confirmButtonColor: '#1a237e',
+              timer: 1500,
+              showConfirmButton: false
+            });
+            this.loadTasks();
+          },
+          error: () => {
+            this.loading = false;
+            this.cdr.detectChanges();
+            Swal.fire('Error', 'Hubo un problema y no se pudo eliminar la tarea.', 'error');
+          }
+        });
+      }
+    });
+  }
+
+  logout(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      sessionStorage.removeItem('currentUser');
+    }
+    this.router.navigate(['/login']);
   }
 }
 

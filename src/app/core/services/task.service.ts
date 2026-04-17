@@ -11,7 +11,7 @@ export class TaskService {
 
   private readonly apiBase = environment.apiBase;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getTasks(): Observable<TaskResultDto[]> {
     const url = `${this.apiBase}Tasks/TaskList`;
@@ -21,6 +21,16 @@ export class TaskService {
   createTask(taskData: any): Observable<any> {
     const url = `${this.apiBase}Tasks/CreateTask`;
     return this.http.post(url, taskData, { responseType: 'text' });
+  }
+
+  updateTaskStatus(data: { id: number, status: string, userIdMod?: number }): Observable<any> {
+    const url = `${this.apiBase}Tasks/UpdateStatus`;
+    return this.http.put(url, data, { responseType: 'text' });
+  }
+
+  deleteTask(id: number, currentUserId: number): Observable<any> {
+    const url = `${this.apiBase}Tasks/DeleteTask/${id}?usuarioMod=${currentUserId}`;
+    return this.http.delete(url, { responseType: 'text' });
   }
 }
 

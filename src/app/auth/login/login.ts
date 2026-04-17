@@ -8,12 +8,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 
 import Swal from 'sweetalert2';
 
 import { AuthService } from '../../core/services/auth.service';
 import { LoginRequest } from '../../core/interfaces/user.interface';
+import { CreateUserModalComponent } from '../create-user-modal/create-user-modal';
+import { UserListModalComponent } from '../user-list-modal/user-list-modal';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +30,7 @@ import { LoginRequest } from '../../core/interfaces/user.interface';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatDialogModule
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss'
@@ -39,7 +43,8 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private dialog: MatDialog
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -61,6 +66,34 @@ export class LoginComponent {
     if (passwordCtrl.errors?.['required']) return 'Debes ingresar la contraseña';
     if (passwordCtrl.errors?.['minlength']) return 'La contraseña debe tener al menos 6 caracteres';
     return '';
+  }
+
+  openCreateUserModal(): void {
+    const dialogRef = this.dialog.open(CreateUserModalComponent, {
+      width: '480px',
+      disableClose: true,
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().subscribe((created: boolean) => {
+      if (created) {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Usuario registrado!',
+          text: 'El usuario fue creado correctamente. Ya puede iniciar sesión.',
+          confirmButtonColor: '#1a237e',
+          timer: 2500,
+          showConfirmButton: false
+        });
+      }
+    });
+  }
+
+  openUserListModal(): void {
+    this.dialog.open(UserListModalComponent, {
+      width: '520px',
+      autoFocus: false
+    });
   }
 
   onSubmit(): void {
@@ -126,5 +159,6 @@ export class LoginComponent {
     });
   }
 }
+
 
 
