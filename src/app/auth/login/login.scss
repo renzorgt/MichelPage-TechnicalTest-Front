@@ -1,0 +1,110 @@
+/* ============================================================
+   Login Page Styles
+   ============================================================ */
+
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px 16px;
+  position: relative;
+  overflow: hidden;
+
+  /* decorative blobs */
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+    pointer-events: none;
+  }
+
+  &::before {
+    width: 500px;
+    height: 500px;
+    background: white;
+    top: -150px;
+    right: -150px;
+  }
+
+  &::after {
+    width: 350px;
+    height: 350px;
+    background: white;
+    bottom: -100px;
+    left: -100px;
+  }
+}
+
+
+/* ---------- Card ---------- */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  z-index: 1;
+  border-radius: 16px !important;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3) !important;
+  background: white !important;
+
+  .card-header {
+    padding: 24px 24px 8px;
+
+    mat-card-title {
+      font-size: 1.4rem !important;
+      font-weight: 600 !important;
+      color: #1a237e;
+    }
+
+    mat-card-subtitle {
+      font-size: 0.85rem !important;
+      margin-top: 4px !important;
+    }
+  }
+
+  mat-card-content {
+    padding: 8px 24px 24px !important;
+  }
+}
+
+/* ---------- Form ---------- */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* ---------- Submit Button ---------- */
+
+.btn-spinner {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+
+  ::ng-deep circle {
+    stroke: white !important;
+  }
+}
+
+/* ---------- Footer ---------- */
+.footer-text {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.78rem;
+  margin: 0;
+  z-index: 1;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+  .login-card {
+    border-radius: 12px !important;
+  }
+}

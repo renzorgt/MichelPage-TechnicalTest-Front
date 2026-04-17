@@ -1,0 +1,116 @@
+<div class="container-fluid">
+    <mat-card style="margin-top: 10px; padding: 10px">
+        <mat-toolbar class="custom-header">
+            <mat-card-title>Task Manager</mat-card-title>
+            <div class="example-spacer"></div>
+            <mat-icon style="color: white;" routerLink="/dashboard/cotizaciones" matTooltip="Nueva Cotización"
+                class="pointer">add_circle</mat-icon>
+        </mat-toolbar>
+    </mat-card>
+
+    @if (loading){
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <div class="mat-elevation-z8">
+        <mat-form-field class="filter">
+            <mat-label>Filtro de Búsqueda</mat-label>
+            <input matInput (keyup)="applyFilter($event)" placeholder="Buscar por cliente, estado..." #input>
+        </mat-form-field>
+    </div>
+
+    <div class="mat-elevation-z8">
+        <div class="table-responsive">
+            <table mat-table [dataSource]="dataSource" matSort>
+
+                <!-- ID Column -->
+                <ng-container matColumnDef="id">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>No.</th>
+                    <td mat-cell *matCellDef="let element">{{element.id}}</td>
+                </ng-container>
+
+                <!-- Cliente Column -->
+                <ng-container matColumnDef="clienteId">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Identificación</th>
+                    <td mat-cell *matCellDef="let element">{{element.cliente.numeroDocumento}}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="nombreCompleto">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
+                    <td mat-cell *matCellDef="let element">{{element.cliente.nombreCompleto}}</td>
+                </ng-container>
+
+                <!-- Teléfono Column -->
+                <ng-container matColumnDef="telefono">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono</th>
+                    <td mat-cell *matCellDef="let element">{{element.cliente?.telefono}}</td>
+                </ng-container>
+
+                <!-- Fecha Evento Column -->
+                <ng-container matColumnDef="fechaEvento">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Evento</th>
+                    <!-- <td mat-cell *matCellDef="let element">{{element.fechaEvento | date:'yyyy/MM/dd'}}</td> -->
+                </ng-container>
+
+                <!-- Num Personas Column -->
+                <ng-container matColumnDef="numPersonas">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Personas</th>
+                    <td mat-cell *matCellDef="let element">{{element.numPersonas}}</td>
+                </ng-container>
+
+                <!-- Total Column -->
+                <ng-container matColumnDef="total">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+                </ng-container>
+
+                <!-- Estado Column -->
+                <!-- <ng-container matColumnDef="estado">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+                    <td mat-cell *matCellDef="let element">
+                        <span [ngClass]="{
+                            'estado-pendiente': element.estado === 'Pendiente',
+                            'estado-confirmada': element.estado === 'Confirmada',
+                            'estado-rechazada': element.estado === 'Rechazada'
+                        }">{{element.estado}}</span>
+                    </td>
+                </ng-container> -->
+
+                <!-- Fecha Inserta Column -->
+                <ng-container matColumnDef="fechaInserta">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Creación</th>
+                    <!-- <td mat-cell *matCellDef="let element">{{element.fechaInserta | date:'yyyy/MM/dd'}}</td> -->
+                </ng-container>
+
+                <!-- Acciones Column -->
+                <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let element" style="text-align: right;">
+                        <!-- @if (element.estado === 'Pendiente') {
+                        <a matTooltip="Confirmar cotización" class="pointer" style="color: #0f5132;"
+                            (click)="confirmar(element)">
+                            <mat-icon>check_circle</mat-icon>
+                        </a>
+                        }
+                        <a matTooltip="Editar" style="color: rgb(113, 113, 113);" class="pointer"
+                            (click)="editar(element.id)"><mat-icon>edit</mat-icon></a>
+                        <a matTooltip="Imprimir cotización" class="pointer" style="color: rgb(113, 113, 113);"
+                            (click)="imprimir(element)">
+                            <mat-icon>print</mat-icon></a>
+                        <a matTooltip="Eliminar" class="pointer"
+                            style="color: rgb(113, 113, 113);"><mat-icon>delete</mat-icon></a> -->
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <!-- Row shown when there is no matching data -->
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="8">No se encontraron cotizaciones para "{{input.value}}"</td>
+                </tr>
+            </table>
+        </div>
+        <mat-paginator style="background-color: rgb(223, 223, 223);" [pageSizeOptions]="[5, 10, 25, 100]"
+            aria-label="Seleccionar página de cotizaciones"></mat-paginator>
+    </div>
+</div>
