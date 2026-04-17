@@ -15,7 +15,9 @@
           <input matInput id="email" type="email" formControlName="email" placeholder="tucorreo@ejemplo.com"
             autocomplete="email" />
           <mat-icon matPrefix>email</mat-icon>
-          <mat-error *ngIf="loginForm.get('email')?.touched">{{ emailError }}</mat-error>
+          @if (loginForm.get('email')?.touched) {
+          <mat-error>{{ emailError }}</mat-error>
+          }
         </mat-form-field>
 
         <!-- Password -->
@@ -28,14 +30,19 @@
             [attr.aria-label]="hidePassword ? 'Mostrar contraseña' : 'Ocultar contraseña'">
             <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
-          <mat-error *ngIf="loginForm.get('password')?.touched">{{ passwordError }}</mat-error>
+          @if (loginForm.get('password')?.touched) {
+          <mat-error>{{ passwordError }}</mat-error>
+          }
         </mat-form-field>
 
         <!-- Submit -->
         <button mat-flat-button id="login-submit-btn" type="submit" [disabled]="isLoading">
-          <mat-spinner *ngIf="isLoading" diameter="20" class="btn-spinner"></mat-spinner>
-          <span *ngIf="!isLoading">Ingresar</span>
-          <span *ngIf="isLoading">Cargando...</span>
+          @if (isLoading) {
+          <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+          <span>Cargando...</span>
+          } @else {
+          <span>Ingresar</span>
+          }
         </button>
 
       </form>

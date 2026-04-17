@@ -17,4 +17,10 @@ export class TaskService {
     const url = `${this.apiBase}Tasks/TaskList`;
     return this.http.get<TaskResultDto[]>(url);
   }
+
+  createTask(taskData: any): Observable<any> {
+    const url = `${this.apiBase}Tasks/CreateTask`;
+    return this.http.post(url, taskData, { responseType: 'text' });
+  }
 }
+

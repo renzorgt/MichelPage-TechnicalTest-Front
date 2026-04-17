@@ -11,11 +11,13 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import Swal from 'sweetalert2';
 
 import { TaskService } from '../../core/services/task.service';
 import { TaskResultDto } from '../../core/interfaces/task.interface';
+import { CreateTaskModalComponent } from './create-task-modal/create-task-modal';
 
 @Component({
   selector: 'app-task-manager',
@@ -33,6 +35,7 @@ import { TaskResultDto } from '../../core/interfaces/task.interface';
     MatInputModule,
     MatSortModule,
     MatSelectModule,
+    MatDialogModule,
     RouterModule
   ],
   templateUrl: './task-manager.html',
@@ -41,7 +44,7 @@ import { TaskResultDto } from '../../core/interfaces/task.interface';
 export class TaskManager implements OnInit {
   loading = true;
   dataSource = new MatTableDataSource<TaskResultDto>();
-  displayedColumns: string[] = ['id', 'titulo', 'userName', 'status', 'fechaCreacion', 'fechaModificacion', 'acciones'];
+  displayedColumns: string[] = ['id', 'titulo', 'userName', 'status', 'prioridad', 'fechaEstimada', 'descripcion', 'fechaCreacion', 'acciones'];
 
   statusFilter = 'Todos';
   textFilter = '';
@@ -49,7 +52,11 @@ export class TaskManager implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  constructor(private taskService: TaskService, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private taskService: TaskService, 
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
+  ) { }
 
   ngOnInit(): void {
     this.setupCustomFilter();
@@ -57,7 +64,7 @@ export class TaskManager implements OnInit {
   }
 
   setupCustomFilter(): void {
-    this.dataSource.filterPredicate = (data: TaskResultDto, filterStr: string) => {
+    this.dataSource.filterPredicate = (data: TaskResultDto | any, filterStr: string) => {
       let searchParams: { status: string, text: string };
       try {
         searchParams = JSON.parse(filterStr);
@@ -65,10 +72,8 @@ export class TaskManager implements OnInit {
         return true;
       }
 
-      // 1. Filtrado por Estado
       const matchStatus = searchParams.status === 'Todos' || data.status === searchParams.status;
 
-      // 2. Filtrado por Texto (búsqueda general)
       const dataStr = Object.keys(data).reduce((acc: string, key: string) => {
         return acc + (data as any)[key] + ' ';
       }, '').toLowerCase();
@@ -84,7 +89,24 @@ export class TaskManager implements OnInit {
 
     this.taskService.getTasks().subscribe({
       next: (tasks) => {
-        this.dataSource.data = tasks;
+        // Expandimos las propiedades contenidas en el JSON "informacion"
+        const mappedTasks = (tasks || []).map(t => {
+          let extra: any = {};
+          try {
+             if (t.informacion) {
+               extra = JSON.parse(t.informacion);
+             }
+          } catch(e) {}
+          
+          return {
+             ...t,
+             prioridad: extra.prioridad || 'N/A',
+             fechaEstimada: extra.fechaEstimada || null,
+             descripcion: extra.descripcion || 'Sin descripción'
+          };
+        });
+
+        this.dataSource.data = mappedTasks;
 
         if (this.paginator) {
           this.dataSource.paginator = this.paginator;
@@ -119,7 +141,6 @@ export class TaskManager implements OnInit {
       this.textFilter = input.value?.trim().toLowerCase() || '';
     }
 
-    // Actualizamos el filtro del dataSource usando un JSON string
     this.dataSource.filter = JSON.stringify({
       status: this.statusFilter,
       text: this.textFilter
@@ -128,6 +149,31 @@ export class TaskManager implements OnInit {
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+  }
+
+  openCreateModal(): void {
+    const dialogRef = this.dialog.open(CreateTaskModalComponent, {
+      width: '600px',
+      disableClose: true,
+      autoFocus: false,
+      panelClass: 'custom-dialog-container'
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result === true) {
+        // Mostrar mensaje de éxito y recargar
+        Swal.fire({
+          icon: 'success',
+          title: '¡Creación Exitosa!',
+          text: 'La tarea ha sido registrada correctamente.',
+          confirmButtonColor: '#1a237e',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        
+        this.loadTasks();
+      }
+    });
   }
 
   editar(id: number): void {

@@ -1,0 +1,84 @@
+<div class="modal-header">
+    <h2 mat-dialog-title>Crear Nueva Tarea</h2>
+    <button mat-icon-button (click)="closeModal()" class="btn-close" [disabled]="isLoading" matTooltip="Cerrar">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content>
+    <form [formGroup]="taskForm" class="task-form">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Título</mat-label>
+            <input matInput formControlName="titulo" placeholder="Ingresa un título para la tarea" maxlength="200">
+            <mat-icon matPrefix>title</mat-icon>
+            @if (taskForm.get('titulo')?.hasError('required')) {
+            <mat-error>El título es requerido</mat-error>
+            }
+            @if (taskForm.get('titulo')?.hasError('maxlength')) {
+            <mat-error>Máximo 200 caracteres permitidos</mat-error>
+            }
+        </mat-form-field>
+
+        <div class="row">
+            <mat-form-field appearance="outline" class="col-half">
+                <mat-label>Usuario Asignado</mat-label>
+                <mat-select formControlName="userId" [disabled]="isFetchingUsers">
+                    @for (user of users; track user.id) {
+                    <mat-option [value]="user.id">
+                        {{ user.nombre }}
+                    </mat-option>
+                    }
+                </mat-select>
+                <mat-icon matPrefix>person</mat-icon>
+                @if (isFetchingUsers) {
+                <mat-hint>Cargando usuarios...</mat-hint>
+                }
+                @if (taskForm.get('userId')?.hasError('required')) {
+                <mat-error>Debe seleccionar un usuario</mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="col-half">
+                <mat-label>Prioridad</mat-label>
+                <mat-select formControlName="prioridad">
+                    <mat-option value="Baja">Baja</mat-option>
+                    <mat-option value="Media">Media</mat-option>
+                    <mat-option value="Alta">Alta</mat-option>
+                    <mat-option value="Urgente">Urgente</mat-option>
+                </mat-select>
+                <mat-icon matPrefix>flag</mat-icon>
+                @if (taskForm.get('prioridad')?.hasError('required')) {
+                <mat-error>Prioridad es requerida</mat-error>
+                }
+            </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fecha Estimada de Finalización</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="fechaEstimada">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+            @if (taskForm.get('fechaEstimada')?.hasError('required')) {
+            <mat-error>Seleccione una fecha</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descripción / Observaciones</mat-label>
+            <textarea matInput formControlName="descripcion" placeholder="Detalles extra de la tarea" rows="3"></textarea>
+            <mat-icon matPrefix>description</mat-icon>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="modal-actions">
+    <button mat-button (click)="closeModal()" [disabled]="isLoading" class="btn-cancel">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="isLoading || taskForm.invalid || isFetchingUsers">
+        @if (isLoading) {
+        <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+        } @else {
+        <span>Crear Tarea</span>
+        }
+    </button>
+</mat-dialog-actions>

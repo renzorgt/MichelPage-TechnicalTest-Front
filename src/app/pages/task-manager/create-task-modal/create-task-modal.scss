@@ -1,0 +1,59 @@
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px 0 24px;
+    
+    h2 {
+        margin: 0;
+        font-weight: 500;
+        color: #1a237e;
+    }
+    
+    .btn-close {
+        color: #757575;
+        margin-top: -10px;
+        margin-right: -10px;
+    }
+}
+
+.task-form {
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+    gap: 4px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    align-items: baseline;
+}
+
+.col-half {
+    flex: 1;
+}
+
+.modal-actions {
+    padding: 0 24px 24px 24px;
+    margin-bottom: 0;
+
+    .btn-cancel {
+        color: #616161;
+    }
+}
+
+.btn-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+
+    ::ng-deep circle {
+        stroke: white !important;
+    }
+}

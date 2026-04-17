@@ -7,10 +7,16 @@
         </mat-toolbar>
     </mat-card>
     <mat-card style="margin-top: 10px; padding: 10px">
-        <span style="color: rgb(41, 40, 40);" matTooltip="Nueva Tarea" class="pointer">Crear Tarea</span> <mat-icon
-            style="color: rgb(41, 40, 40);" matTooltip="Nueva Tarea" class="pointer">add_circle</mat-icon>
+        <div>
+            <span style="color: rgb(41, 40, 40);" matTooltip="Nueva Tarea" class="pointer"
+                (click)="openCreateModal()">Crear Tarea</span>
+            <mat-icon style="color: rgb(41, 40, 40);" matTooltip="Nueva Tarea" class="pointer"
+                (click)="openCreateModal()">add_circle</mat-icon>
+        </div>
     </mat-card>
-    <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+    @if (loading) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
 
     <div class="mat-elevation-z8 filter-container"
         style="padding: 10px 15px 0 15px; margin-top: 15px; background: white; border-radius: 4px; display: flex; gap: 16px;">
@@ -18,9 +24,9 @@
             <mat-label>Estado</mat-label>
             <mat-select [value]="statusFilter" (selectionChange)="onFilterChange('status', $event.value)">
                 <mat-option value="Todos">Todos</mat-option>
-                <mat-option value="Pending">Pendiente</mat-option>
-                <mat-option value="InProgress">En progreso</mat-option>
-                <mat-option value="Done">Completada</mat-option>
+                <mat-option value="Pendiente">Pendiente</mat-option>
+                <mat-option value="En Curso">En Curso</mat-option>
+                <mat-option value="Realizada">Realizada</mat-option>
             </mat-select>
         </mat-form-field>
 
@@ -58,33 +64,70 @@
                     <td mat-cell *matCellDef="let element">
                         <span [ngClass]="{
                             'estado-pendiente': element.status === 'Pendiente',
-                            'estado-completada': element.status === 'Completada'
+                            'estado-completada': element.status === 'Realizada',
+                            'estado-en-curso': element.status === 'En Curso'
                         }">{{element.status}}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Prioridad Column -->
+                <ng-container matColumnDef="prioridad">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Prioridad</th>
+                    <td mat-cell *matCellDef="let element">
+                        <span style="font-weight: 500;"
+                            [ngStyle]="{'color': element.prioridad === 'Urgente' ? 'red' : (element.prioridad === 'Alta' ? 'orange' : 'inherit')}">
+                            {{element.prioridad}}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Fecha Estimada Column -->
+                <ng-container matColumnDef="fechaEstimada">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>F. Estimada</th>
+                    <td mat-cell *matCellDef="let element">
+                        @if (element.fechaEstimada) {
+                        {{element.fechaEstimada | date:'yyyy/MM/dd'}}
+                        } @else {
+                        -
+                        }
+                    </td>
+                </ng-container>
+
+                <!-- Descripción Column -->
+                <ng-container matColumnDef="descripcion">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Descripción</th>
+                    <td mat-cell *matCellDef="let element" [matTooltip]="element.descripcion">
+                        {{ element.descripcion.length > 25 ? (element.descripcion | slice:0:25) + '...' :
+                        element.descripcion }}
                     </td>
                 </ng-container>
 
                 <!-- Fecha Creacion Column -->
                 <ng-container matColumnDef="fechaCreacion">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Creación</th>
-                    <td mat-cell *matCellDef="let element">{{element.fechaCreacion | date:'yyyy/MM/dd HH:mm'}}</td>
-                </ng-container>
-
-                <!-- Fecha Modificacion Column -->
-                <ng-container matColumnDef="fechaModificacion">
-                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Modificación</th>
-                    <td mat-cell *matCellDef="let element">{{element.fechaModificacion | date:'yyyy/MM/dd HH:mm'}}</td>
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>F. Creación</th>
+                    <td mat-cell *matCellDef="let element">{{element.fechaCreacion | date:'yyyy/MM/dd'}}</td>
                 </ng-container>
 
                 <!-- Acciones Column -->
                 <ng-container matColumnDef="acciones">
                     <th mat-header-cell *matHeaderCellDef>Acciones</th>
                     <td mat-cell *matCellDef="let element" style="text-align: right;">
-                        <a matTooltip="Editar" style="color: rgb(113, 113, 113);" class="pointer"
+                        @if(element.status === 'En Curso') {
+                        <a matTooltip="Finalizar Tarea" style="color: rgb(0, 161, 13);" class="pointer"
                             (click)="editar(element.id)">
-                            <mat-icon>edit</mat-icon>
+                            <mat-icon>done_outline</mat-icon>
                         </a>
-                        <a matTooltip="Eliminar" class="pointer"
-                            style="color: rgb(113, 113, 113);"><mat-icon>delete</mat-icon></a>
+                        }
+                        @if(element.status === 'Pendiente') {
+                        <a matTooltip="Iniciar Tarea" style="color: rgb(0, 2, 143);" class="pointer"
+                            (click)="editar(element.id)">
+                            <mat-icon>play_circle</mat-icon>
+                        </a>
+                        }
+                        @if(element.status !== 'Realizada') {
+                        <a matTooltip="Eliminar Tarea" class="pointer"
+                            style="color: rgb(173, 34, 34);"><mat-icon>delete</mat-icon></a>
+                        }
                     </td>
                 </ng-container>
 
