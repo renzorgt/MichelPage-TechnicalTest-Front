@@ -113,7 +113,7 @@ export class LoginComponent {
       next: (user) => {
         this.isLoading = false;
         sessionStorage.setItem('currentUser', JSON.stringify(user));
-        this.router.navigate(['/task-manager']);
+        this.router.navigate(['/task-manager1']);
       },
       error: (err) => {
         this.isLoading = false;

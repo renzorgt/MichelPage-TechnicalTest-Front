@@ -1,0 +1,53 @@
+/* Structure */
+table {
+    //display: block;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.mat-mdc-form-field {
+    font-size: 14px;
+    width: 100%;
+}
+
+.filter {
+    margin-top: 10px;
+}
+
+// th{
+//   width: 20%;
+// }
+
+.pointer {
+    cursor: pointer;
+}
+
+.table-resposive,
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.estado-pendiente {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.estado-en-curso {
+    background-color: #fff3cd;
+    color: #7a0485;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.estado-completada {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}

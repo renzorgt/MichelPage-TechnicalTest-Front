@@ -9,7 +9,7 @@
             </button>
         </mat-toolbar>
         <mat-toolbar class="custom-header">
-            <mat-card-title>Task Manager</mat-card-title>
+            <mat-card-title>Task Manager 2</mat-card-title>
             <div class="example-spacer"></div>
         </mat-toolbar>
     </mat-card>
@@ -26,10 +26,10 @@
                 (click)="openCreateUserModal()">person_add</mat-icon>
 
 
-            <span style="color: rgb(41, 40, 40); margin-left: 16px;" matTooltip="Task Manager 2" class="pointer"
-                [routerLink]="['/task-manager2']">Task Manager 2</span>
-            <mat-icon style="color: rgb(41, 40, 40);" matTooltip="Task Manager 2" class="pointer"
-                [routerLink]="['/task-manager2']">task</mat-icon>
+            <span style="color: rgb(41, 40, 40); margin-left: 16px;" matTooltip="Task Manager 1" class="pointer"
+                [routerLink]="['/task-manager1']">Task Manager 1</span>
+            <mat-icon style="color: rgb(41, 40, 40);" matTooltip="Task Manager 1" class="pointer"
+                [routerLink]="['/task-manager1']">task</mat-icon>
         </div>
     </mat-card>
     @if (loading) {
@@ -37,10 +37,11 @@
     }
 
     <div class="mat-elevation-z8 filter-container"
-        style="padding: 10px 15px 0 15px; margin-top: 15px; background: white; border-radius: 4px; display: flex; gap: 16px;">
-        <mat-form-field style="width: 200px;">
+        style="padding: 10px 15px 15px 15px; margin-top: 15px; background: white; border-radius: 4px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+        
+        <mat-form-field style="flex: 1; min-width: 150px;">
             <mat-label>Estado</mat-label>
-            <mat-select [value]="statusFilter" (selectionChange)="onFilterChange('status', $event.value)">
+            <mat-select [(ngModel)]="statusFilter">
                 <mat-option value="Todos">Todos</mat-option>
                 <mat-option value="Pending">Pending</mat-option>
                 <mat-option value="InProgress">InProgress</mat-option>
@@ -48,10 +49,37 @@
             </mat-select>
         </mat-form-field>
 
-        <mat-form-field style="flex: 1;">
-            <mat-label>Filtro general</mat-label>
-            <input matInput (keyup)="onFilterChange('text', $event)" placeholder="Buscar por título, usuario..." #input>
+        <mat-form-field style="flex: 1; min-width: 150px;">
+            <mat-label>Usuario</mat-label>
+            <mat-select [(ngModel)]="userIdFilter">
+                <mat-option [value]="0">Todos</mat-option>
+                @for (user of users; track user.id) {
+                    <mat-option [value]="user.id">{{ user.nombre }}</mat-option>
+                }
+            </mat-select>
         </mat-form-field>
+
+        <mat-form-field style="flex: 1; min-width: 150px;">
+            <mat-label>Prioridad</mat-label>
+            <mat-select [(ngModel)]="prioridadFilter">
+                <mat-option value="Todas">Todas</mat-option>
+                <mat-option value="Baja">Baja</mat-option>
+                <mat-option value="Media">Media</mat-option>
+                <mat-option value="Alta">Alta</mat-option>
+                <mat-option value="Urgente">Urgente</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field style="flex: 1; min-width: 150px;">
+            <mat-label>Fecha Estimada</mat-label>
+            <input matInput [matDatepicker]="picker" [(ngModel)]="fechaEstimadaFilter">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="loadTasks()" style="height: 56px; margin-bottom: 22px;">
+            <mat-icon>search</mat-icon> Consultar
+        </button>
     </div>
 
     <div class="mat-elevation-z8">
@@ -161,7 +189,7 @@
 
                 <!-- Row shown when there is no matching data -->
                 <tr class="mat-row" *matNoDataRow>
-                    <td class="mat-cell" colspan="7">No se encontraron tareas para "{{input.value}}"</td>
+                    <td class="mat-cell" colspan="7">No se encontraron tareas con los filtros seleccionados.</td>
                 </tr>
             </table>
         </div>
